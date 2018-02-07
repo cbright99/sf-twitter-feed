@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import twitter4j.conf.ConfigurationBuilder;
+import twitter4j.MediaEntity;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -53,7 +54,7 @@ public class TwitterFeed extends HttpServlet {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String fstring = request.getParameter("fstring");
+		String fstring = (request.getParameter("fstring") != null) ? request.getParameter("fstring") : "";
 		System.out.println("\nTwitterFeed - doGet - fstring = " + fstring);
 		
 		response.setContentType("application/json;charset=UTF-8"); 
@@ -94,8 +95,16 @@ public class TwitterFeed extends HttpServlet {
             	String userName = status.getUser().getName();
             	String screenName = status.getUser().getScreenName();
             	String profileImageURL = status.getUser().getProfileImageURL();
-            	String tweetText = status.getText();
+            	String tweetText = status.getText();            	
             	int retweets = status.getRetweetCount();
+            	String mediaEntity = "";
+            	
+            	MediaEntity[] media = status.getMediaEntities(); //get the media entities from the status
+            	for(MediaEntity m : media){ //search trough your entities
+            		mediaEntity = m.getMediaURL();
+            	    System.out.println(m.getMediaURL()); //get your url!
+            	}
+            	
             	tweetCount++;
             	
             	if (tweetText.indexOf(fstring)>=0 && tweetCount <= 10) {
@@ -105,6 +114,7 @@ public class TwitterFeed extends HttpServlet {
 	            	tweetDetails.put("profileImageURL", profileImageURL);
 	            	tweetDetails.put("tweetText", tweetText);
 	            	tweetDetails.put("retweets", retweets);
+	            	tweetDetails.put("mediaEntity", mediaEntity);
 	            	
 	            	tweetDetailsArr = new JSONArray();
 	            	tweetDetailsArr.add(tweetDetails);
@@ -114,16 +124,6 @@ public class TwitterFeed extends HttpServlet {
 	            	
 	            	tweetsArr.add(tweetObj);
             	}
-            	
-            	/*
-            	jsonResponse += "   <tweet>\n";
-            	jsonResponse += "      <userName>" + userName + "</userName>\n";
-            	jsonResponse += "      <screenName>" + screenName + "</screenName>\n";
-            	jsonResponse += "      <profileImageURL>" + profileImageURL + "</profileImageURL>\n";
-            	jsonResponse += "      <tweet>" + tweet + "</tweet>\n";
-            	jsonResponse += "      <retweets>" + retweets + "</retweets>\n";
-            	jsonResponse += "   </tweet>\n";
-            	*/
             }
             
             tweetFinalObj = new JSONObject();

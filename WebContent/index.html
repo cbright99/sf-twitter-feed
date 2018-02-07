@@ -11,12 +11,15 @@
 <script language="javascript">
 	window.onload = function() {getJsonData(); setTimer();}
 </script>
+<link rel="stylesheet" type="text/css" href="tablestyle.css">
 </head>
 <body>
  
-<div id="fullDiv" style="width:100%" >
+<div id="fullDiv" style="width:100%">
+
+<h2>Salesforce Twitter Feed</h2>
  
-Filter by <input name="fstring" type="text" value=""> - <button type="button" onClick="getJsonData();">Apply</button>
+<h3>Filter by <input name="fstring" type="text" value=""> - <button type="button" onClick="getJsonData();">Apply</button></h3>
  
 <div id="output"></div>
  
@@ -34,30 +37,55 @@ Filter by <input name="fstring" type="text" value=""> - <button type="button" on
 	
 	  var fs = $('input[name=fstring]').val();	
 		
-	  var table="<html><table border=0>";
+	  var table="<html><table width=\"100%\" border=0>";
 	
 	  $.get("TwitterFeed?fstring="+fs, function(json) {
 		  
 		  var tweets=json.tweets;
 		 
 		  $.each(tweets, function(index, element) {
-			  
-			  table=table+"<tr><td><table border=1>";
+			  	  
+			  table=table+"<tr><td bgcolor=\"#006600\"><table class=\"blueTable\" width=\"100%\" border=0>";
 			  
 	          var tweet = element.tweet;
 	          
 	          $.each(tweet, function(index, element) {
-	              table=table+"<tr><td><img src=\"" + element.profileImageURL +"\"></td><td>" + element.userName +"</td><td>@" + element.screenName +"</td><td>" + element.retweets +"</td></tr>";
-	              table=table+"<tr><td colspan=4>" + element.tweetText +"</td></tr>";
+	              table=table+"<tr><td rowspan=2><img src=\"" + element.profileImageURL + "\"></td><td width=\"100%\">" + element.userName + " - @" + element.screenName +" (" + element.retweets +")</td></tr>";
+	              table=table+"<tr><td width=\"100%\">" + linkify(element.tweetText) +"</td></tr>";
+	              
+	              var mediaEntity = element.mediaEntity;
+	              if (mediaEntity.length > 0 && mediaEntity.includes("http")) {
+	            	  table=table+"<tr><td colspan=2 width=\"100%\"><img src=\"" + mediaEntity + "\"></td></tr>";
+	              }
+	              
 	          });
 	          
-	          table=table+"</table></td></tr><tr><td>&nbsp;</td></tr>";
+	          table=table+"</table></td></tr>";	          
+	          table=table+"<tr><td>&nbsp;</td></tr>";
 		  });
 		  
 		  table=table+="</table></html>";
 		  
 	      $("#output").html(table);
 	   });
+	}
+	
+	function linkify(inputText) {
+	    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+
+	    //URLs starting with http://, https://, or ftp://
+	    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+	    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+	    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+	    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+	    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+	    //Change email addresses to mailto:: links.
+	    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+	    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+	    return replacedText;
 	}
 	 
 </script>
