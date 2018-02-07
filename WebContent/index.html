@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JSon Data Parsing</title>
+  <style type="text/css">
+ 
+</style>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script language="javascript">
+	window.onload = function() {getJsonData(); setTimer();}
+</script>
+</head>
+<body>
+ 
+<div id="fullDiv" style="width:100%" >
+ 
+Filter by <input name="fstring" type="text" value=""> - <button type="button" onClick="getJsonData();">Apply</button>
+ 
+<div id="output"></div>
+ 
+</div>                                          
+ 
+<script type="text/javascript">
+
+	function setTimer()
+	{
+		setInterval(getJsonData, 60000);
+	}
+	
+	function getJsonData()
+	{
+	
+	  var fs = $('input[name=fstring]').val();	
+		
+	  var table="<html><table border=0>";
+	
+	  $.get("TwitterFeed?fstring="+fs, function(json) {
+		  
+		  var tweets=json.tweets;
+		 
+		  $.each(tweets, function(index, element) {
+			  
+			  table=table+"<tr><td><table border=1>";
+			  
+	          var tweet = element.tweet;
+	          
+	          $.each(tweet, function(index, element) {
+	              table=table+"<tr><td><img src=\"" + element.profileImageURL +"\"></td><td>" + element.userName +"</td><td>@" + element.screenName +"</td><td>" + element.retweets +"</td></tr>";
+	              table=table+"<tr><td colspan=4>" + element.tweetText +"</td></tr>";
+	          });
+	          
+	          table=table+"</table></td></tr><tr><td>&nbsp;</td></tr>";
+		  });
+		  
+		  table=table+="</table></html>";
+		  
+	      $("#output").html(table);
+	   });
+	}
+	 
+</script>
+ 
+</body>
+</html>
